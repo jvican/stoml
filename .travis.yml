@@ -1,0 +1,19 @@
+language: scala
+
+scala:
+  - 2.11.7
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    recipients:
+      - jorgevc@fastmail.es
+
+jdk:
+  - oraclejdk7
+  - oraclejdk8
+  - openjdk7
+  - openjdk8

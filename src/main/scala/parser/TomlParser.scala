@@ -48,6 +48,7 @@ trait TomlSymbol {
   val Dashes = "-_"
   val NLChars = ("\r\n", "\n")
   val WSChars = " \t"
+  val CommentSymbol = "#"
 }
 
 trait TomlParser extends ParserUtil with TomlSymbol {
@@ -56,7 +57,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
 
   val newline = P(StringIn(NLChars._1, NLChars._2))
   val charsChunk = P(CharsWhile(UntilNewline))
-  val comment: P0 = P { "#" ~ charsChunk.rep ~ &(newline | End) }
+  val comment: P0 = P { CommentSymbol ~ charsChunk.rep ~ &(newline | End) }
   val WS0: P0 = P { CharsWhile(Whitespace) }
   val WS: P0 = P { NoCut(NoTrace((WS0 | comment | newline).rep.?)) }
 
@@ -97,7 +98,6 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     P { validKey ~ WS0.? ~ "=" ~ WS0.? ~ elem } map {
       kv: (String, Elem) => Pair(kv._1, kv._2)
     }
-
   lazy val array: Parser[Arr] =
     P { "[" ~ WS ~ elem.rep(sep=WS0.? ~ "," ~/ WS) ~ WS ~ "]" } map Arr
 

@@ -11,7 +11,8 @@ trait TableTomlGen {
   this: TomlSymbol
     with StringTomlGen
     with NumbersTomlGen
-    with BooleanTomlGen =>
+    with BooleanTomlGen
+    with CommentTomlGen =>
 
   val sps = List(" ", "\t")
 
@@ -54,6 +55,12 @@ trait TableTomlGen {
     i <- chooseNum(0, 5)
   } yield pairFormat(key, value, repeat(sp, i))
 
+  def pairWithCommentsGen: Gen[String] = for {
+    p <- pairGen
+    commInPreviousLine <- commentGen
+    commInSameLine <- commentGen
+  } yield commInPreviousLine + p + commInSameLine
+
   def tableDefGen: Gen[String] = for {
     labels <- nonEmptyListOf(doubleQuoteStrGen)
     sp <- oneOf(sps)
@@ -64,15 +71,18 @@ trait TableTomlGen {
   def tableGen = for {
     tdef <- tableDefGen
     n <- chooseNum(0, 10)
-    ps <- listOfN(n, pairGen)
-  } yield tableFormat(tdef, ps)
+    ps <- listOfN(n, pairWithCommentsGen)
+    c1 <- commentGen
+    c2 <- commentGen
+  } yield c1 + tableFormat(tdef, ps) + c2
 
 }
 
 class TableTomlSpec extends PropSpec with PropertyChecks with Matchers
                                        with BooleanTomlGen with StringTomlGen
                                        with NumbersTomlGen with TableTomlGen
-                                       with TomlParser with TestParserUtil {
+                                       with CommentTomlGen with TomlParser
+                                       with TestParserUtil {
   import Toml._
 
   property("parse a pairs (key and value)") {
