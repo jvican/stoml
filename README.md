@@ -8,7 +8,7 @@ minimal configuration file format (yay!). Just what everyone is looking for.
 So this is a Scala library that allows you to parse any TOML file in a blink 
 of an eye.
   
-# Acknowledgements
+## Acknowledgements
 Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) and 
 [Scalacheck](https://github.com/rickynils/scalacheck).
   
