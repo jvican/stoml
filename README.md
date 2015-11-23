@@ -1,4 +1,5 @@
 # TOML parser for Scala
+[![Build Status](https://travis-ci.org/jvican/stoml.svg)](https://travis-ci.org/jvican/stoml)
 We, computer scientists, need to get in touch with the world (oh, damn it). That
 means that the people we build software for need to interact with our software
 in an easy way.
