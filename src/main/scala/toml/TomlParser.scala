@@ -1,8 +1,8 @@
-package parser
+package toml
 
 import scala.language.{implicitConversions, postfixOps}
 
-object Toml {
+object Toml extends TomlSymbol {
   case class NamedFunction[T, V](f: T => V, name: String)
     extends (T => V) {
       def apply(t: T) = f(t)
@@ -13,21 +13,33 @@ object Toml {
     def v: Any
   }
 
+  sealed trait Node extends Any with Elem
+
   sealed trait Bool extends Elem
   case object True extends Bool {def v = true}
   case object False extends Bool {def v = false}
 
-  case class Str(v: String) extends AnyVal with Elem
-  case class Integ(v: Long) extends AnyVal with Elem
-  case class Doub(v: Double) extends AnyVal with Elem
-  case class Arr(v: Seq[Elem]) extends AnyVal with Elem
-  case class Pair(v: (String, Elem)) extends AnyVal with Elem
+  object Str {
+    def dequoteStr(s: String, q: String) =
+      s.stripPrefix(q).stripSuffix(q)
 
-  type Labels = Seq[String]
-  case class LMap(v: (Labels, Map[String, Elem])) extends Elem
-  object LMap {
-    def apply(ls: Labels, ps: Seq[Pair]): LMap =
-      LMap(ls -> (ps map (Pair.unapply(_).get) toMap))
+    def cleanStr(s: String): String =
+      dequoteStr(dequoteStr(s, SingleQuote), DoubleQuote)
+
+    def cleanedApply(s: String): Str = Str(cleanStr(s))
+  }
+
+  case class Str(v: String) extends AnyVal with Elem
+  case class Integer(v: Long) extends AnyVal with Elem
+  case class Real(v: Double) extends AnyVal with Elem
+  case class Arr(v: Seq[Elem]) extends AnyVal with Elem
+  case class Pair(v: (String, Elem)) extends AnyVal with Node
+
+  type TableName = Vector[String]
+  case class Table(v: (TableName, Map[String, Elem])) extends Node
+  object Table {
+    def apply(ls: TableName, ps: Seq[Pair]): Table =
+      Table(ls.toVector -> (ps map (Pair.unapply(_).get) toMap))
   }
 }
 
@@ -70,9 +82,9 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val escapedChars = P { CharsWhile(basicChars) | "\\\""}
 
   val basicStr: Parser[Str] =
-    P { DoubleQuote ~/ escapedChars.rep.! ~ DoubleQuote } map Str
+    P { DoubleQuote ~/ escapedChars.rep.! ~ DoubleQuote } map Str.cleanedApply
   val literalStr: Parser[Str] =
-    P { SingleQuote ~/ unescapedChars.rep.! ~ SingleQuote } map Str
+    P { SingleQuote ~/ unescapedChars.rep.! ~ SingleQuote } map Str.cleanedApply
   val string: Parser[Str] = P { basicStr | literalStr }
 
   def rmUnderscore(s: String) = s.replace("_", "")
@@ -80,11 +92,11 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val integral = P { digits.rep(min=1, sep="_") }
   val fractional = P { "." ~ integral }
   val exponent = P { CharIn("eE") ~ +-.? ~ integral }
-  val integer: Parser[Integ] =
-    P { +-.? ~ integral }.! map (s => Integ(rmUnderscore(s).toLong))
-  val double: Parser[Doub] =
+  val integer: Parser[Integer] =
+    P { +-.? ~ integral }.! map (s => Integer(rmUnderscore(s).toLong))
+  val double: Parser[Real] =
     P { +-.? ~ integral ~ (fractional | exponent) }.! map {
-      s => Doub(rmUnderscore(s).toDouble)
+      s => Real(rmUnderscore(s).toDouble)
     }
 
   val `true` = P { "true" } map (_ => True)
@@ -105,14 +117,39 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     P { validKey.rep(min=1, sep=WS0.? ~ "." ~ WS0.?) }
   val tableDef: Parser[Seq[String]] =
     P { "[" ~ WS0.? ~ tableIds ~ WS0.? ~ "]" }
-  val table: Parser[LMap] =
-    P { tableDef ~ WS ~ pair.rep(sep=WS) } map {
-      t => LMap(t._1, t._2)
+  val table: Parser[Table] =
+    P { WS ~ tableDef ~ WS ~ pair.rep(sep=WS) } map {
+      t => Table(t._1.toVector.map(Str.cleanStr), t._2)
     }
 
   lazy val elem: Parser[Elem] = P {
-    WS ~ (table | string | boolean | double | integer | array) ~ WS ~ End.?
+    WS ~ (string | boolean | double | integer | array) ~ WS
   }
+
+  lazy val node: Parser[_ <: Node] = P { WS ~ (pair | table) ~ WS }
+  lazy val nodes: Parser[Seq[Node]] = P { node.rep(min=1, sep=WS) ~ End }
 }
 
-object TomlParser extends TomlParser
+object TomlParserApi extends TomlParser {
+  import toml.Toml.{Node, Table, Pair}
+
+  type Key = Vector[String]
+
+  case class TomlContent(c: Map[Key, Node]) {
+    def lookup(k: Key): Option[Node] = c.get(k)
+  }
+
+  object TomlContent {
+    def apply(s: Seq[Node]): TomlContent = TomlContent {
+        s.foldLeft(Map.empty[Key, Node])((m, e) => e match {
+          case t: Table => m + (t.v._1 -> t)
+          case p: Pair => m + (Vector(p.v._1) -> p)
+        })
+      }
+  }
+
+  import fastparse.all._
+  import fastparse.core.Result
+  def toToml(s: String): Result[TomlContent] =
+    (nodes map TomlContent.apply).parse(s)
+}

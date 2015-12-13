@@ -1,4 +1,4 @@
-package parser
+package toml
 
 import fastparse.core.Result
 import fastparse.core.Result.{Failure, Success}

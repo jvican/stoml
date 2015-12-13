@@ -1,4 +1,4 @@
-package parser
+package toml
 
 import org.scalacheck.Gen
 import org.scalatest.prop._
@@ -85,10 +85,17 @@ class TableTomlSpec extends PropSpec with PropertyChecks with Matchers
                                        with TestParserUtil {
   import Toml._
 
-  property("parse a pairs (key and value)") {
+  property("parse pairs (key and value)") {
     forAll(pairGen) {
       s: String =>
         shouldBeSuccess[Pair](pair.parse(s))
+    }
+  }
+
+  property("parse pairs (with `node` parser)") {
+    forAll(pairGen) {
+      s: String =>
+        shouldBeSuccess(node.parse(s))
     }
   }
 
@@ -102,7 +109,14 @@ class TableTomlSpec extends PropSpec with PropertyChecks with Matchers
   property("parse tables") {
     forAll(tableGen) {
       s: String =>
-        shouldBeSuccess(elem.parse(s))
+        shouldBeSuccess[Table](table.parse(s))
+    }
+  }
+
+  property("parse tables (with `node` parser)") {
+    forAll(tableGen) {
+      s: String =>
+        shouldBeSuccess(node.parse(s))
     }
   }
 }

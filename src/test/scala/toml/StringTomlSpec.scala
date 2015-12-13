@@ -1,4 +1,4 @@
-package parser
+package toml
 
 import fastparse.core.Result.Success
 import org.scalacheck.Gen
@@ -10,17 +10,6 @@ trait StringTomlGen {
 
   def enquoteStr(s: String, q: String): String =
     q + s + q
-
-  def dequoteStr(s: String, q: String): String =
-    s.stripPrefix(q).stripSuffix(q)
-
-  def dequote(s: String): String = s match {
-    case x if x.startsWith(SingleQuote) && x.endsWith(SingleQuote) =>
-      dequoteStr(x, SingleQuote)
-    case x if x.startsWith(DoubleQuote) && x.endsWith(DoubleQuote) =>
-      dequoteStr(x, DoubleQuote)
-    case x => x
-  }
 
 
   def quotedStrGen(quote: String): Gen[String] = for {
@@ -51,7 +40,7 @@ class StringTomlSpec extends PropSpec with PropertyChecks with Matchers
   property("parse single and double-quoted strings") {
     forAll(validStrGen) {
       s: String =>
-        val expected = Success(Str(dequote(s)), s.length)
+        val expected = Success(Str.cleanedApply(s), s.length)
         elem.parse(s) shouldBe expected
     }
   }

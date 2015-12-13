@@ -1,4 +1,4 @@
-package parser
+package toml
 
 import fastparse.core.Result.Success
 import org.scalacheck.Gen
@@ -34,7 +34,7 @@ class NumbersTomlSpec extends PropSpec with PropertyChecks with Matchers
   property("parse integers") {
     forAll(validLongGen) {
       s: String =>
-        val expected = Success(Integ(rmUnderscore(s).toLong), s.length)
+        val expected = Success(Integer(rmUnderscore(s).toLong), s.length)
         elem.parse(s) shouldBe expected
     }
   }
@@ -42,7 +42,7 @@ class NumbersTomlSpec extends PropSpec with PropertyChecks with Matchers
   property("parse doubles") {
     forAll(validDoubleGen) {
       s: String =>
-        val expected = Success(Doub(rmUnderscore(s).toDouble), s.length)
+        val expected = Success(Real(rmUnderscore(s).toDouble), s.length)
         elem.parse(s) shouldBe expected
     }
   }

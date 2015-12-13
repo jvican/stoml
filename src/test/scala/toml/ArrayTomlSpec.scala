@@ -1,4 +1,4 @@
-package parser
+package toml
 
 import org.scalacheck.Gen
 import org.scalatest.prop._
