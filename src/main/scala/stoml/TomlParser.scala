@@ -146,7 +146,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   lazy val nodes: Parser[Seq[Node]] = P { node.rep(min=1, sep=WS) ~ End }
 }
 
-object TomlParserApi extends TomlParser {
+trait TomlParserApi extends TomlParser {
   import stoml.Toml.{Node, Table, Pair}
 
   type Key = Vector[String]
@@ -169,3 +169,5 @@ object TomlParserApi extends TomlParser {
   def toToml(s: String): Parsed[TomlContent] =
     (nodes map TomlContent.apply).parse(s)
 }
+
+object TomlParserApi extends TomlParserApi
