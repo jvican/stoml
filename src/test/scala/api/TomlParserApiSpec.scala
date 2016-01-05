@@ -4,7 +4,7 @@ import fastparse.core.Parsed.{Failure, Success}
 import org.scalatest.{Matchers, FunSpec}
 
 class TomlParserApiSpec extends FunSpec with Matchers {
-  import toml.TomlParserApi._
+  import stoml.TomlParserApi._
 
   val smallFileTest =
     """best-author-ever = "Anonymous"

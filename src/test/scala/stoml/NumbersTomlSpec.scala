@@ -1,4 +1,4 @@
-package toml
+package stoml
 
 import fastparse.core.Parsed.Success
 import org.scalacheck.Gen

@@ -2,7 +2,7 @@ name := "stoml"
 
 organization := "com.github.jvican"
 
-version := "1.1"
+version := "0.1"
 
 scalaVersion := "2.11.7"
 

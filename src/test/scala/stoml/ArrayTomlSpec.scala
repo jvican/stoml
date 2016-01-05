@@ -1,4 +1,4 @@
-package toml
+package stoml
 
 import org.scalacheck.Gen
 import org.scalatest.prop._

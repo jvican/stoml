@@ -1,4 +1,4 @@
-package toml
+package stoml
 
 import scala.language.{implicitConversions, postfixOps}
 import java.util.{Date => JDate}
@@ -147,7 +147,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
 }
 
 object TomlParserApi extends TomlParser {
-  import toml.Toml.{Node, Table, Pair}
+  import stoml.Toml.{Node, Table, Pair}
 
   type Key = Vector[String]
 
