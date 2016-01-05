@@ -6,7 +6,6 @@ import org.scalatest.{Matchers, PropSpec}
 
 import scala.language.postfixOps
 
-
 trait ArrayTomlGen {
   this: TomlSymbol
     with StringTomlGen
@@ -30,10 +29,12 @@ trait ArrayTomlGen {
   } yield arrayFormat(elems, (c1, ss, c2))
 }
 
-class ArrayTomlSpec extends PropSpec with PropertyChecks with Matchers
-                                       with NumbersTomlGen with StringTomlGen
-                                       with ArrayTomlGen with TomlParser
-                                       with TestParserUtil {
+class ArrayTomlSpec extends PropSpec 
+    with PropertyChecks with Matchers
+    with NumbersTomlGen with StringTomlGen
+    with ArrayTomlGen with TomlParser
+    with TestParserUtil {
+
   property("parse arrays") {
     forAll(arrayGen) {
       s: String =>

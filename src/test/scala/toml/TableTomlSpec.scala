@@ -78,11 +78,13 @@ trait TableTomlGen {
 
 }
 
-class TableTomlSpec extends PropSpec with PropertyChecks with Matchers
-                                       with BooleanTomlGen with StringTomlGen
-                                       with NumbersTomlGen with TableTomlGen
-                                       with CommentTomlGen with TomlParser
-                                       with TestParserUtil {
+class TableTomlSpec extends PropSpec 
+    with PropertyChecks with Matchers
+    with BooleanTomlGen with StringTomlGen
+    with NumbersTomlGen with TableTomlGen
+    with CommentTomlGen with TomlParser
+    with TestParserUtil {
+
   import Toml._
 
   property("parse pairs (key and value)") {

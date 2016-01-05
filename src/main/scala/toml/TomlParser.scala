@@ -1,6 +1,8 @@
 package toml
 
 import scala.language.{implicitConversions, postfixOps}
+import java.util.{Date => JDate}
+import java.text.SimpleDateFormat
 
 object Toml extends TomlSymbol {
   case class NamedFunction[T, V](f: T => V, name: String)
@@ -9,30 +11,26 @@ object Toml extends TomlSymbol {
       override def toString() = name
   }
 
-  sealed trait Elem extends Any {
-    def v: Any
-  }
-
+  sealed trait Elem extends Any { def v: Any }
   sealed trait Node extends Any with Elem
 
   sealed trait Bool extends Elem
   case object True extends Bool {def v = true}
   case object False extends Bool {def v = false}
 
+  case class Str(v: String) extends AnyVal with Elem
   object Str {
     def dequoteStr(s: String, q: String) =
       s.stripPrefix(q).stripSuffix(q)
-
     def cleanStr(s: String): String =
       dequoteStr(dequoteStr(s, SingleQuote), DoubleQuote)
-
     def cleanedApply(s: String): Str = Str(cleanStr(s))
   }
 
-  case class Str(v: String) extends AnyVal with Elem
   case class Integer(v: Long) extends AnyVal with Elem
   case class Real(v: Double) extends AnyVal with Elem
   case class Arr(v: Seq[Elem]) extends AnyVal with Elem
+  case class Date(v: JDate) extends AnyVal with Elem
   case class Pair(v: (String, Elem)) extends AnyVal with Node
 
   type TableName = Vector[String]
@@ -74,6 +72,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val WS: P0 = P { NoCut(NoTrace((WS0 | comment | newline).rep.?)) }
 
   val letters = P { CharsWhile(Letters) }
+  val digit = P { CharIn('0' to '9') }
   val digits = P { CharsWhile(Digits) }
 
   val literalChars = NamedFunction(!SingleQuote.contains(_: Char), "LitStr")
@@ -103,13 +102,30 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val `false` = P { "false" } map (_ => False)
   val boolean: Parser[Bool] = P { `true` | `false` }
 
-  val dashes = P { CharIn(Dashes) }
-  val bareKey = P { (letters | digits | dashes).rep(min=1) }
-  val validKey = P { bareKey | NoCut(basicStr) }.!
-  lazy val pair: Parser[Pair] =
-    P { validKey ~ WS0.? ~ "=" ~ WS0.? ~ elem } map {
-      kv: (String, Elem) => Pair(kv._1, kv._2)
+  lazy val date: Parser[Date] =
+    rfc3339.opaque("<valid-date-rfc3339>").map { t =>
+      /* Even though this extra parsing is not necessary,
+       * it is done just for simplicity, avoiding the use
+       * of `java.util.Calendar` instances. */
+      Date(formatter.parse(t))
     }
+
+  private val formatter = 
+    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+  def twice[T](p: Parser[T]) = p ~ p
+  def fourTimes[T](p: Parser[T]) = twice(p) ~ twice(p)
+  val rfc3339: Parser[String] =
+    P { fourTimes(digit) ~ "-" ~ twice(digit) ~ "-" ~ 
+        twice(digit) ~ "T" ~ twice(digit) ~ ":" ~
+        twice(digit) ~ ":" ~ twice(digit) ~ ("." ~
+        digit.rep(min=3, max=3)).? ~ "Z".? }.!
+
+  val dashes = P { CharIn(Dashes) }
+  val bareKey = P { (letters | digits | dashes).rep(min=1) }.!
+  val validKey: Parser[String] = P { bareKey | NoCut(basicStr) }.!
+  lazy val pair: Parser[Pair] =
+    P { validKey ~ WS0.? ~ "=" ~ WS0.? ~ elem } map Pair
   lazy val array: Parser[Arr] =
     P { "[" ~ WS ~ elem.rep(sep=WS0.? ~ "," ~/ WS) ~ WS ~ "]" } map Arr
 
@@ -123,7 +139,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     }
 
   lazy val elem: Parser[Elem] = P {
-    WS ~ (string | boolean | double | integer | array) ~ WS
+    WS ~ (string | boolean | double | integer | array | date) ~ WS
   }
 
   lazy val node: Parser[_ <: Node] = P { WS ~ (pair | table) ~ WS }
@@ -149,7 +165,7 @@ object TomlParserApi extends TomlParser {
   }
 
   import fastparse.all._
-  import fastparse.core.Result
-  def toToml(s: String): Result[TomlContent] =
+  import fastparse.core.Parsed
+  def toToml(s: String): Parsed[TomlContent] =
     (nodes map TomlContent.apply).parse(s)
 }

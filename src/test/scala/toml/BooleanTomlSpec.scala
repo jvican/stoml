@@ -1,6 +1,6 @@
 package toml
 
-import fastparse.core.Result.Success
+import fastparse.core.Parsed.Success
 import org.scalacheck.Gen
 import org.scalatest.prop._
 import org.scalatest.{Matchers, PropSpec}
@@ -21,9 +21,11 @@ trait BooleanTomlGen {
     Gen.oneOf("True", "False")
 }
 
-class BooleanTomlSpec extends PropSpec with PropertyChecks with Matchers
-                                         with BooleanTomlGen with TomlParser
-                                         with TestParserUtil {
+class BooleanTomlSpec extends PropSpec 
+    with PropertyChecks with Matchers
+    with BooleanTomlGen with TomlParser
+    with TestParserUtil {
+
   property("parse boolean literals") {
     forAll(validBoolGen) {
       s: String =>

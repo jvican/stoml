@@ -1,6 +1,6 @@
 package toml
 
-import fastparse.core.Result.Success
+import fastparse.core.Parsed.Success
 import org.scalacheck.Gen
 import org.scalatest.prop._
 import org.scalatest.{Matchers, PropSpec}
@@ -27,9 +27,11 @@ trait NumbersTomlGen {
     } yield fs
 }
 
-class NumbersTomlSpec extends PropSpec with PropertyChecks with Matchers
-                                         with NumbersTomlGen with TomlParser
-                                         with TestParserUtil {
+class NumbersTomlSpec extends PropSpec 
+    with PropertyChecks with Matchers
+    with NumbersTomlGen with TomlParser
+    with TestParserUtil {
+
   import Toml._
   property("parse integers") {
     forAll(validLongGen) {
