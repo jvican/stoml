@@ -8,10 +8,9 @@ minimal configuration file format (minimal, yay!). Just what everyone is looking
 So this is a Scala library that allows you to parse any TOML file in a blink 
 of an eye. It is very handy when the user is not a technical user. Also, it is easier
 than YAML.
+
+## Import in your project
+(ready in a few days)
   
 ## Acknowledgements
-Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) and 
-[Scalacheck](https://github.com/rickynils/scalacheck).
-  
-__This library is currently on development, although most of the functionality 
-is already there, some is missing, specially fancy things.__
+Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) (which means astonishing speed for parsing) and [Scalacheck](https://github.com/rickynils/scalacheck) to automatically parse any combination of valid TOML files.
