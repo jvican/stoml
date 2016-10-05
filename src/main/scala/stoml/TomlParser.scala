@@ -1,5 +1,7 @@
 package stoml
 
+import java.io.File
+
 import scala.language.{implicitConversions, postfixOps}
 import java.util.{Date => JDate}
 import java.text.SimpleDateFormat
@@ -78,10 +80,10 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val literalChars = NamedFunction(!SingleQuote.contains(_: Char), "LitStr")
   val basicChars = NamedFunction(!DoubleQuote.contains(_: Char), "BasicStr")
   val unescapedChars = P { CharsWhile(literalChars) }
-  val escapedChars = P { CharsWhile(basicChars) | "\\\""}
+  val escapedChars = P { CharsWhile(basicChars) }
 
   val basicStr: Parser[Str] =
-    P { DoubleQuote ~/ escapedChars.rep.! ~ DoubleQuote } map Str.cleanedApply
+    P { DoubleQuote ~/ (("\\" ~ "\"") | escapedChars).rep.! ~ DoubleQuote } map Str.cleanedApply
   val literalStr: Parser[Str] =
     P { SingleQuote ~/ unescapedChars.rep.! ~ SingleQuote } map Str.cleanedApply
   val string: Parser[Str] = P { basicStr | literalStr }
@@ -166,8 +168,12 @@ trait TomlParserApi extends TomlParser {
 
   import fastparse.all._
   import fastparse.core.Parsed
-  def toToml(s: String): Parsed[TomlContent] =
+  def parseToml(s: String): Parsed[TomlContent] =
     (nodes map TomlContent.apply).parse(s)
+
+  // Inefficient but necessary to parse everything from a String
+  def parseToml(f: File): Parsed[TomlContent] =
+    parseToml(scala.io.Source.fromFile(f).mkString)
 }
 
 object TomlParserApi extends TomlParserApi

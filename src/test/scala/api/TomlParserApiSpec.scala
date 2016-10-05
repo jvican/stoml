@@ -15,7 +15,7 @@ class TomlParserApiSpec extends FunSpec with Matchers {
 
   describe("The TomlParser API") {
     it("should parse a file correctly, parsing also the EOF") {
-      toToml(smallFileTest) match {
+      parseToml(smallFileTest) match {
         case Success(v, _) =>
           (v lookup Vector("num", "theory")) should not be empty
           (v lookup Vector("best-author-ever")) should not be empty
