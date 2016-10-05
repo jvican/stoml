@@ -7,7 +7,7 @@ version := "0.1"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Vector(
-  "com.lihaoyi" %% "fastparse" % "0.3.4",
+  "com.lihaoyi" %% "fastparse" % "0.3.7",
   "org.scalacheck" %% "scalacheck" % "1.12.5" % "test",
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
 )
