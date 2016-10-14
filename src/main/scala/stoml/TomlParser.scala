@@ -6,7 +6,11 @@ import scala.language.{implicitConversions, postfixOps}
 import java.util.{Date => JDate}
 import java.text.SimpleDateFormat
 
-object Toml extends TomlSymbol {
+private[stoml] trait Common {
+  type Key = String
+}
+
+object Toml extends TomlSymbol with Common {
 
   case class NamedFunction[T, V](f: T => V, name: String) extends (T => V) {
     def apply(t: T) = f(t)
@@ -15,7 +19,7 @@ object Toml extends TomlSymbol {
   }
 
   sealed trait Elem extends Any {
-    def v: Any
+    def elem: Any
   }
 
   sealed trait Node extends Any with Elem
@@ -23,14 +27,14 @@ object Toml extends TomlSymbol {
   sealed trait Bool extends Elem
 
   case object True extends Bool {
-    def v = true
+    def elem = true
   }
 
   case object False extends Bool {
-    def v = false
+    def elem = false
   }
 
-  case class Str(v: String) extends AnyVal with Elem
+  case class Str(elem: String) extends AnyVal with Elem
 
   object Str {
     def dequoteStr(s: String, q: String) =
@@ -42,25 +46,22 @@ object Toml extends TomlSymbol {
     def cleanedApply(s: String): Str = Str(cleanStr(s))
   }
 
-  case class Integer(v: Long) extends AnyVal with Elem
+  case class Integer(elem: Long) extends AnyVal with Elem
 
-  case class Real(v: Double) extends AnyVal with Elem
+  case class Real(elem: Double) extends AnyVal with Elem
 
-  case class Arr(v: Seq[Elem]) extends AnyVal with Elem
+  case class Arr(elem: Seq[Elem]) extends AnyVal with Elem
 
-  case class Date(v: JDate) extends AnyVal with Elem
+  case class Date(elem: JDate) extends AnyVal with Elem
 
-  case class Pair(v: (String, Elem)) extends AnyVal with Node
+  case class Pair(elem: (String, Elem)) extends AnyVal with Node
 
-  type TableName = Vector[String]
-
-  case class Table(v: (TableName, Map[String, Elem])) extends Node
+  case class Table(elem: (Key, Map[String, Elem])) extends Node
 
   object Table {
-    def apply(ls: TableName, ps: Seq[Pair]): Table =
-      Table(ls.toVector -> (ps map (Pair.unapply(_).get) toMap))
+    def apply(ls: Key, ps: Seq[Pair]): Table =
+      Table(ls -> (ps map (Pair.unapply(_).get) toMap))
   }
-
 }
 
 trait ParserUtil { this: TomlSymbol =>
@@ -174,7 +175,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     P("[" ~ WS0.? ~ tableIds ~ WS0.? ~ "]")
   val table: Parser[Table] =
     P(WS ~ tableDef ~ WS ~ pair.rep(sep = WS)).map(t =>
-      Table(t._1.toVector.map(Str.cleanStr), t._2))
+      Table(t._1.map(Str.cleanStr).mkString("."), t._2))
 
   lazy val elem: Parser[Elem] = P {
     WS ~ (string | boolean | double | integer | array | date) ~ WS
@@ -184,28 +185,24 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   lazy val nodes: Parser[Seq[Node]] = P(node.rep(min = 1, sep = WS) ~ End)
 }
 
-trait TomlParserApi extends TomlParser {
+trait TomlParserApi extends TomlParser with Common {
 
   import stoml.Toml.{Node, Table, Pair}
-
-  type Key = Vector[String]
-  implicit def stringToKey(key: String): Key = {
-    require(!key.isEmpty, "Key must be non-empty")
-    key.split(".").toVector
-  }
 
   case class TomlContent(map: Map[Key, Node]) {
     def lookup(k: Key): Option[Node] = map.get(k)
     def filter(f: Key => Boolean): Iterator[Node] =
       map.filterKeys(f).values.iterator
+    def childOf(parentKey: Key): Iterator[Node] =
+      filter(key => key.startsWith(parentKey))
   }
 
   object TomlContent {
     def apply(s: Seq[Node]): TomlContent = TomlContent {
       s.foldLeft(Map.empty[Key, Node])((m, e) =>
         e match {
-          case t: Table => m + (t.v._1 -> t)
-          case p: Pair => m + (Vector(p.v._1) -> p)
+          case t: Table => m + (t.elem._1 -> t)
+          case p: Pair => m + (p.elem._1 -> p)
       })
     }
   }

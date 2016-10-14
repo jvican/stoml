@@ -1,7 +1,8 @@
 package api
 
 import fastparse.core.Parsed.{Failure, Success}
-import org.scalatest.{Matchers, FunSpec}
+import org.scalatest.{FunSpec, Matchers}
+import stoml.Toml
 
 class TomlParserApiSpec extends FunSpec with Matchers {
   import stoml.TomlParserApi._
@@ -14,11 +15,31 @@ class TomlParserApiSpec extends FunSpec with Matchers {
       |perfection = [6, 28, 496]""".stripMargin
 
   describe("The TomlParser API") {
-    it("should parse a file correctly, parsing also the EOF") {
+    it("should allow lookups in parsed content") {
       parseToml(smallFileTest) match {
         case Success(v, _) =>
-          (v lookup Vector("num", "theory")) should not be empty
-          (v lookup Vector("best-author-ever")) should not be empty
+          (v lookup "num.theory") should not be empty
+          (v lookup "best-author-ever") should not be empty
+        case f: Failure =>
+          fail("`toToml` has not parsed correctly the file")
+      }
+    }
+
+    it("should allow filtering in parsed content") {
+      parseToml(smallFileTest) match {
+        case Success(v, _) =>
+          v.filter(_.contains("e")).size shouldBe 2
+        case f: Failure =>
+          fail("`toToml` has not parsed correctly the file")
+      }
+    }
+
+    it("should allow filtering by the prefix key") {
+      parseToml(smallFileTest) match {
+        case Success(v, _) =>
+          val subkeys = v.childOf("num").toVector
+          subkeys.size shouldBe 1
+          assert(subkeys(0).elem.isInstanceOf[(Any, Any)])
         case f: Failure =>
           fail("`toToml` has not parsed correctly the file")
       }
