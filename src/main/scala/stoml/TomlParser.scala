@@ -166,7 +166,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   lazy val pair: Parser[Pair] =
     P(validKey ~ WS0.? ~ "=" ~ WS0.? ~ elem) map Pair
   lazy val array: Parser[Arr] =
-    P("[" ~ WS ~ elem.rep(sep = WS0.? ~ "," ~/ WS) ~ WS ~ "]") map Arr
+    P("[" ~ WS ~ elem.rep(sep = "," ~ WS) ~ ",".? ~ WS ~ "]") map Arr
 
   val tableIds: Parser[Seq[String]] =
     P(validKey.rep(min = 1, sep = WS0.? ~ "." ~ WS0.?))
@@ -189,10 +189,15 @@ trait TomlParserApi extends TomlParser {
   import stoml.Toml.{Node, Table, Pair}
 
   type Key = Vector[String]
-  implicit def stringToKey(key: String): Key = key.split(".").toVector
+  implicit def stringToKey(key: String): Key = {
+    require(!key.isEmpty, "Key must be non-empty")
+    key.split(".").toVector
+  }
 
-  case class TomlContent(private val c: Map[Key, Node]) {
-    def lookup(k: Key): Option[Node] = c.get(k)
+  case class TomlContent(map: Map[Key, Node]) {
+    def lookup(k: Key): Option[Node] = map.get(k)
+    def filter(f: Key => Boolean): Iterator[Node] =
+      map.filterKeys(f).values.iterator
   }
 
   object TomlContent {
