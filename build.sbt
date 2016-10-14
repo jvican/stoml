@@ -2,7 +2,7 @@ lazy val stoml = project.in(file("."))
 
 name := "stoml"
 
-organization := "com.github.jvican"
+organization := "me.vican.jorge"
 
 scalaVersion := "2.11.7"
 
