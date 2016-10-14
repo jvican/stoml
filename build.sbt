@@ -12,6 +12,7 @@ libraryDependencies ++= Vector(
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
 )
 
+publishMavenStyle := false
 homepage := Some(url("https://github.com/jvican/stoml"))
 licenses := Seq("MPLv2 License" -> url("https://opensource.org/licenses/MPL-2.0"))
 
