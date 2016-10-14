@@ -17,10 +17,10 @@ homepage := Some(url("https://github.com/jvican/stoml"))
 licenses := Seq("MPLv2 License" -> url("https://opensource.org/licenses/MPL-2.0"))
 
 // Bintray
+publishTo := (publishTo in bintray).value
 bintrayOrganization := None
 bintrayRepository := "releases"
 bintrayPackage := "stoml"
-bintrayReleaseOnPublish := false
 
 // Release
 import ReleaseTransformations._
