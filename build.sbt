@@ -16,7 +16,6 @@ homepage := Some(url("https://github.com/jvican/stoml"))
 licenses := Seq("MPL-2.0 License" -> url("https://opensource.org/licenses/MPL-2.0"))
 
 pomExtra in Global := {
-  <url>https://github.com/jvican/stoml.git</url>
   <scm>
     <developerConnection>scm:git:git@github.com:jvican</developerConnection>
     <url>https://github.com/jvican/stoml.git</url>
