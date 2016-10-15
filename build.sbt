@@ -15,6 +15,22 @@ libraryDependencies ++= Vector(
 homepage := Some(url("https://github.com/jvican/stoml"))
 licenses := Seq("MPL-2.0 License" -> url("https://opensource.org/licenses/MPL-2.0"))
 
+pomExtra in Global := {
+  <url>https://github.com/jvican/stoml.git</url>
+  <scm>
+    <developerConnection>scm:git:git@github.com:jvican</developerConnection>
+    <url>https://github.com/jvican/stoml.git</url>
+    <connection>scm:git:git@github.com:jvican/stoml.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>jvican</id>
+      <name>Jorge Vicente Cantero</name>
+      <url>https://github.com/jvican</url>
+    </developer>
+  </developers>
+}
+
 // Bintray
 publishTo := (publishTo in bintray).value
 bintrayOrganization := None
