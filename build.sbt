@@ -33,5 +33,5 @@ pomExtra in Global := {
 // Bintray
 publishTo := (publishTo in bintray).value
 bintrayOrganization := None
-bintrayRepository := "releases"
+bintrayRepository := "nightlies"
 releaseCrossBuild := false
