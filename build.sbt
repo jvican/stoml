@@ -34,7 +34,6 @@ pomExtra in Global := {
 publishTo := (publishTo in bintray).value
 bintrayOrganization := None
 bintrayRepository := "releases"
-bintrayPackage := "stoml"
 
 // Release
 import ReleaseTransformations._
