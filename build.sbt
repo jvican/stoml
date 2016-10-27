@@ -12,15 +12,8 @@ libraryDependencies ++= Vector(
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
 )
 
-homepage := Some(url("https://github.com/jvican/stoml"))
 licenses := Seq("MPL-2.0" -> url("https://opensource.org/licenses/MPL-2.0"))
-
 pomExtra in Global := {
-  <scm>
-    <developerConnection>scm:git:git@github.com:jvican</developerConnection>
-    <url>https://github.com/jvican/stoml.git</url>
-    <connection>scm:git:git@github.com:jvican/stoml.git</connection>
-  </scm>
   <developers>
     <developer>
       <id>jvican</id>
