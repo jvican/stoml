@@ -13,7 +13,7 @@ libraryDependencies ++= Vector(
 )
 
 homepage := Some(url("https://github.com/jvican/stoml"))
-licenses := Seq("MPL-2.0 License" -> url("https://opensource.org/licenses/MPL-2.0"))
+licenses := Seq("MPL-2.0" -> url("https://opensource.org/licenses/MPL-2.0"))
 
 pomExtra in Global := {
   <scm>
