@@ -34,21 +34,4 @@ pomExtra in Global := {
 publishTo := (publishTo in bintray).value
 bintrayOrganization := None
 bintrayRepository := "releases"
-
-// Release
-import ReleaseTransformations._
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  publishArtifacts,
-  releaseStepTask(bintrayRelease in stoml),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
+releaseCrossBuild := false
