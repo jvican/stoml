@@ -30,21 +30,23 @@ releaseCrossBuild := false
 
 /* Tricking the sbt-platform plugin to test `releaseStable`
  * This test is very brittle and will need to change soon.  */
-val rootDir =
-  if (sys.env.get("CI").isDefined) file("/drone")
-  else file(System.getProperty("user.home"))
-platformCiEnvironment := Some(
-  CIEnvironment(
-    rootDir,
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    -1,
-    None,
-    -1,
-    Some("v0.1")
+platformCiEnvironment := {
+  val rootDir =
+    if (platformInsideCi.value) file("/drone")
+    else file(System.getProperty("user.home"))
+  Some(
+    CIEnvironment(
+      rootDir,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      -1,
+      None,
+      -1,
+      Some("v0.1")
+    )
   )
-)
+}
