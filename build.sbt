@@ -27,3 +27,21 @@ pomExtra in Global := {
 bintrayOrganization := None
 bintrayRepository := "nightlies"
 releaseCrossBuild := false
+
+// Tricking the sbt-platform plugin to test `releaseStable`
+platformInsideCi := true
+platformCiEnvironment := Some(
+  CIEnvironment(
+    file("/drone"),
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    -1,
+    None,
+    -1,
+    "v0.1"
+  )
+)
