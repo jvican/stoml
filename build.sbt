@@ -28,9 +28,10 @@ bintrayOrganization := None
 bintrayRepository := "nightlies"
 releaseCrossBuild := false
 
-// Tricking the sbt-platform plugin to test `releaseStable`
+/* Tricking the sbt-platform plugin to test `releaseStable`
+ * This test is very brittle and will need to change soon.  */
 val rootDir =
-  if (platformInsideCi.value) file("/drone")
+  if (sys.env.get("CI").isDefined) file("/drone")
   else file(System.getProperty("java.home"))
 platformCiEnvironment := Some(
   CIEnvironment(
