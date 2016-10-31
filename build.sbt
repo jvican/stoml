@@ -43,7 +43,7 @@ platformCiEnvironment := {
       "",
       "",
       "",
-      -1,
+      scala.util.Random.nextInt.abs,
       None,
       -1,
       Some("v0.1")
