@@ -42,6 +42,6 @@ platformCiEnvironment := Some(
     -1,
     None,
     -1,
-    "v0.1"
+    Some("v0.1")
   )
 )
