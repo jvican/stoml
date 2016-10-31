@@ -32,7 +32,7 @@ releaseCrossBuild := false
  * This test is very brittle and will need to change soon.  */
 val rootDir =
   if (sys.env.get("CI").isDefined) file("/drone")
-  else file(System.getProperty("java.home"))
+  else file(System.getProperty("user.home"))
 platformCiEnvironment := Some(
   CIEnvironment(
     rootDir,
