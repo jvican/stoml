@@ -39,7 +39,7 @@ platformCiEnvironment := {
     CIEnvironment(
       rootDir,
       "linux/x86",
-      RepositoryInfo("", "", "", "", "", "", "", false, true)
+      RepositoryInfo("", "", "", "", "", "", "", false, true),
       CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
       BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
       "",
