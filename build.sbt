@@ -43,7 +43,7 @@ platformCiEnvironment := {
       CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
       BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
       "",
-      -1,
+      Some(-1),
       Some("v0.1")
     )
   )
