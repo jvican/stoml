@@ -34,17 +34,15 @@ platformCiEnvironment := {
   val rootDir =
     if (platformInsideCi.value) file("/drone")
     else file(System.getProperty("user.home"))
+  val randomBuildNumber = scala.util.Random.nextInt.abs
   Some(
     CIEnvironment(
       rootDir,
+      "linux/x86",
+      RepositoryInfo("", "", "", "", "", "", "", false, true)
+      CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
+      BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
       "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      scala.util.Random.nextInt.abs,
-      None,
       -1,
       Some("v0.1")
     )
