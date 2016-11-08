@@ -13,7 +13,7 @@ class HardTomlSpec extends FlatSpec with Matchers {
     val parsed = parseToml(example)
     parsed match {
       case Success(v, _) =>
-      case f: Failure =>
+      case f: Failure[_, _] =>
         fail(s"Failed to parse `$example`: $f")
     }
   }
@@ -23,7 +23,7 @@ class HardTomlSpec extends FlatSpec with Matchers {
     parsed match {
       case Success(v, _) =>
         fail(s"Didn't fail to parse `$example`.")
-      case f: Failure =>
+      case f: Failure[_, _] =>
     }
   }
 
@@ -31,7 +31,7 @@ class HardTomlSpec extends FlatSpec with Matchers {
     val parsed = parseToml(new File("./src/test/scala/stoml/hard_example.toml"))
     parsed match {
       case Success(v, _) =>
-      case f: Failure =>
+      case f: Failure[_, _] =>
         fail(s"The hard example failed with: $f")
     }
   }

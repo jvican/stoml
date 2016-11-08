@@ -2,7 +2,6 @@ package api
 
 import fastparse.core.Parsed.{Failure, Success}
 import org.scalatest.{FunSpec, Matchers}
-import stoml.Toml
 
 class TomlParserApiSpec extends FunSpec with Matchers {
   import stoml.TomlParserApi._
@@ -20,7 +19,7 @@ class TomlParserApiSpec extends FunSpec with Matchers {
         case Success(v, _) =>
           (v lookup "num.theory") should not be empty
           (v lookup "best-author-ever") should not be empty
-        case f: Failure =>
+        case f: Failure[_, _] =>
           fail("`toToml` has not parsed correctly the file")
       }
     }
@@ -29,7 +28,7 @@ class TomlParserApiSpec extends FunSpec with Matchers {
       parseToml(smallFileTest) match {
         case Success(v, _) =>
           v.filter(_.contains("e")).size shouldBe 2
-        case f: Failure =>
+        case f: Failure[_, _] =>
           fail("`toToml` has not parsed correctly the file")
       }
     }
@@ -40,7 +39,7 @@ class TomlParserApiSpec extends FunSpec with Matchers {
           val subkeys = v.childOf("num").toVector
           subkeys.size shouldBe 1
           assert(subkeys(0).elem.isInstanceOf[(Any, Any)])
-        case f: Failure =>
+        case f: Failure[_, _] =>
           fail("`toToml` has not parsed correctly the file")
       }
     }

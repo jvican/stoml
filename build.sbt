@@ -4,12 +4,12 @@ name := "stoml"
 
 organization := "me.vican.jorge"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.0"
 
 libraryDependencies ++= Vector(
-  "com.lihaoyi" %% "fastparse" % "0.3.7",
-  "org.scalacheck" %% "scalacheck" % "1.12.5" % "test",
-  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
+  "com.lihaoyi" %% "fastparse" % "0.4.2",
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
 
 homepage := Some(url("https://github.com/jvican/stoml"))
