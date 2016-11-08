@@ -6,10 +6,13 @@ organization := "me.vican.jorge"
 
 scalaVersion := "2.12.0"
 
+crossScalaVersions := Seq("2.10.6", "2.11.7", "2.12.0")
+
 libraryDependencies ++= Vector(
   "com.lihaoyi" %% "fastparse" % "0.4.2",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
 homepage := Some(url("https://github.com/jvican/stoml"))

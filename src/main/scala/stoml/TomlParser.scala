@@ -181,7 +181,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     WS ~ (string | boolean | double | integer | array | date) ~ WS
   }
 
-  lazy val node: Parser[_ <: Node] = P(WS ~ (pair | table) ~ WS)
+  lazy val node: Parser[Node] = P(WS ~ (pair | table) ~ WS)
   lazy val nodes: Parser[Seq[Node]] = P(node.rep(min = 1, sep = WS) ~ End)
 }
 
