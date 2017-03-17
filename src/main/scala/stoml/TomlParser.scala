@@ -1,6 +1,7 @@
 package stoml
 
 import java.io.File
+import fastparse.all._
 
 import scala.language.{implicitConversions, postfixOps}
 import java.util.{Date => JDate}
@@ -71,7 +72,7 @@ trait ParserUtil { this: TomlSymbol =>
   val Whitespace = NamedFunction(WSChars.contains(_: Char), "Whitespace")
   val Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
   val Letters =
-    NamedFunction((('a' to 'z') ++ ('A' to 'Z')).contains, "Letters")
+    NamedFunction((('a' to 'z') ++ ('A' to 'Z')).contains(_: Char), "Letters")
   val UntilNewline =
     NamedFunction(!NLChars._1.contains(_: Char), "UntilNewline")
 }
@@ -89,7 +90,6 @@ trait TomlSymbol {
 
 trait TomlParser extends ParserUtil with TomlSymbol {
 
-  import fastparse.all._
   import Toml._
 
   val newline = P(StringIn(NLChars._1, NLChars._2))
@@ -181,7 +181,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     WS ~ (string | boolean | double | integer | array | date) ~ WS
   }
 
-  lazy val node: Parser[_ <: Node] = P(WS ~ (pair | table) ~ WS)
+  lazy val node: Parser[Node] = P(WS ~ (pair | table) ~ WS)
   lazy val nodes: Parser[Seq[Node]] = P(node.rep(min = 1, sep = WS) ~ End)
 }
 
@@ -206,9 +206,6 @@ trait TomlParserApi extends TomlParser with Common {
       })
     }
   }
-
-  import fastparse.all._
-  import fastparse.core.Parsed
 
   def parseToml(s: String): Parsed[TomlContent] =
     (nodes map TomlContent.apply).parse(s)
