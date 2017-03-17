@@ -6,6 +6,8 @@ organization := "me.vican.jorge"
 
 scalaVersion := "2.11.7"
 
+resolvers += Resolver.bintrayRepo("jvican", "releases")
+
 libraryDependencies ++= Vector(
   "com.lihaoyi" %% "fastparse" % "0.3.7",
   "org.scalacheck" %% "scalacheck" % "1.12.5" % "test",
