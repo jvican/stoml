@@ -10,7 +10,10 @@ of an eye. It is very handy when the user is not a technical user. Also, it is e
 than YAML.
 
 ## Import in your project
-(ready in a few days)
+```scala
+"me.vican.jorge" %% "stoml" % "0.3"
+resolvers += Some(Resolver.bintrayRepo("jvican", "releases"))
+```
   
 ## Acknowledgements
 Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) (which means astonishing speed for parsing) and [Scalacheck](https://github.com/rickynils/scalacheck) to automatically parse any combination of valid TOML files.
