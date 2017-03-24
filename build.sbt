@@ -29,6 +29,6 @@ pomExtra in Global := {
 }
 
 // Bintray
-bintrayOrganization := None
-bintrayRepository := "stoml"
+bintrayOrganization := Some("scalaplatform")
+bintrayRepository := "modules-nightly-releases"
 releaseCrossBuild := false
