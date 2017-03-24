@@ -28,9 +28,8 @@ pomExtra in Global := {
   </developers>
 }
 
-// Bintray
+// Publish to the user, no default organization
 bintrayOrganization := None
-bintrayRepository := "nightlies"
 releaseCrossBuild := false
 
 /* Tricking the sbt-platform plugin to test `releaseStable`
