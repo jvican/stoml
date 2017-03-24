@@ -30,5 +30,5 @@ pomExtra in Global := {
 
 // Bintray
 bintrayOrganization := Some("scalaplatform")
-bintrayRepository := "modules-nightly-releases"
+bintrayRepository := "nightlies"
 releaseCrossBuild := false
