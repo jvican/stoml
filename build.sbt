@@ -29,6 +29,5 @@ pomExtra in Global := {
 }
 
 // Bintray
-bintrayOrganization := Some("scalaplatform")
-bintrayRepository := "nightlies"
+bintrayOrganization := None
 releaseCrossBuild := false
