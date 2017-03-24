@@ -30,5 +30,5 @@ pomExtra in Global := {
 
 // Bintray
 bintrayOrganization := None
-bintrayRepository := "nightlies"
+bintrayRepository := "stoml"
 releaseCrossBuild := false
