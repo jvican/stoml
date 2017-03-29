@@ -32,7 +32,7 @@ pomExtra in Global := {
 bintrayOrganization := None
 releaseCrossBuild := false
 
-/* Tricking the sbt-platform plugin to test `releaseStable`
+/* Tricking the sbt-platform plugin to test `platformReleaseStable`
  * This test is very brittle and will need to change soon.  */
 platformCiEnvironment := {
   val rootDir =
