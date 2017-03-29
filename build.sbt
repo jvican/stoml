@@ -34,10 +34,9 @@ releaseCrossBuild := false
 
 lazy val releaseOnMergeOnlyCi = taskKey[Unit]("Release on merge only in CI.")
 releaseOnMergeOnlyCi := {
-  System.err.println("HAAAA")
-  System.err.println(sys.env.get("DRONE"))
-  sys.error("I STOPPED YOU")
   if (platformInsideCi.value) {
-    platformReleaseOnMerge.value
+    platformReleaseOnMerge.map { onMerge =>
+      ()
+    }
   }
 }
