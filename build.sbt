@@ -28,16 +28,17 @@ pomExtra in Global := {
   </developers>
 }
 
-// Bintray
-bintrayOrganization := None
-releaseCrossBuild := false
+lazy val bla = settingKey[Boolean]("")
+bla := {
+  true
+}
 
-lazy val releaseOnMergeOnlyCi = taskKey[Unit]("Release on merge only in CI.")
-releaseOnMergeOnlyCi := {
-  System.err.println("HAAAA")
-  System.err.println(sys.env.get("DRONE"))
-  sys.error("I STOPPED YOU")
-  if (platformInsideCi.value) {
-    platformReleaseOnMerge.value
+lazy val initExec = taskKey[Unit]("Eagerly initialize something.")
+initExec := {
+  // The bug describes that this should be run first. However, it's
+  // not, `eagerInit.value` is executed before this statement.
+  sys.error("I SHOULD HAVE BEEN RUN FIRST")
+  if (bla.value) {
+    eagerInit.value
   }
 }
