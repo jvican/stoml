@@ -31,3 +31,10 @@ pomExtra in Global := {
 // Bintray
 bintrayOrganization := None
 releaseCrossBuild := false
+
+lazy val releaseOnMergeOnlyCi = taskKey[Unit]("Release on merge only in CI.")
+releaseOnMergeOnlyCi := {
+  if (platformInsideCi.value)
+    releaseOnMerge.value
+  else ()
+}
