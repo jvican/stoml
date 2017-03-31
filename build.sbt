@@ -48,12 +48,14 @@ platformCiEnvironment := {
     if (platformInsideCi.value) file("/drone")
     else file(System.getProperty("user.home"))
   val randomBuildNumber = scala.util.Random.nextInt.abs
+  val valid = "0123456789abcdef"
+  val sha1 = scala.util.Random.alphanumeric.filter((c: Char) => valid.contains(c)).take(9).mkString
   Some(
     CIEnvironment(
       rootDir,
       "linux/x86",
       RepositoryInfo("", "", "", "", "", "", "", false, true),
-      CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
+      CommitInfo(sha1, "", "", "", "", AuthorInfo("", "", "")),
       BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
       "",
       None,
