@@ -37,6 +37,6 @@ releaseOnMergeOnlyCi := {
   if (platformInsideCi.value) {
     platformReleaseOnMerge.map { onMerge =>
       ()
-    }
+    }.value
   }
 }
