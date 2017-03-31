@@ -40,3 +40,24 @@ releaseOnMergeOnlyCi := {
     }.value
   }
 }
+
+/* Tricking the sbt-platform plugin to test `platformReleaseStable`
+ * This test is very brittle and will need to change soon.  */
+platformCiEnvironment := {
+  val rootDir =
+    if (platformInsideCi.value) file("/drone")
+    else file(System.getProperty("user.home"))
+  val randomBuildNumber = scala.util.Random.nextInt.abs
+  Some(
+    CIEnvironment(
+      rootDir,
+      "linux/x86",
+      RepositoryInfo("", "", "", "", "", "", "", false, true),
+      CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
+      BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
+      "",
+      None,
+      None
+    )
+  )
+}
