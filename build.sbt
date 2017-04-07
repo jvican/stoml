@@ -45,7 +45,7 @@ platformCiEnvironment := {
       "linux/x86",
       RepositoryInfo("", "", "", "", "", "", "", false, true),
       CommitInfo("", "", "", "", "", AuthorInfo("", "", "")),
-      BuildInfo(randomBuildNumber, "", "", "", "", "", "", "", randomBuildNumber - 1, ""),
+      BuildInfo(randomBuildNumber, "", "", "", "", "", "", None, None, None),
       "",
       Some(-1),
       Some("v0.1")
