@@ -31,3 +31,25 @@ pomExtra in Global := {
 // Bintray
 bintrayOrganization := None
 releaseCrossBuild := false
+
+/* Tricking the sbt-platform plugin to test `platformReleaseStable` */
+platformCiEnvironment := {
+  val rootDir =
+    if (platformInsideCi.value) file("/drone")
+    else file(System.getProperty("user.home"))
+  val randomBuildNumber = scala.util.Random.nextInt.abs
+  val valid = "0123456789abcdef"
+  val sha1 = scala.util.Random.alphanumeric.filter((c: Char) => valid.contains(c)).take(9).mkString
+  Some(
+    CIEnvironment(
+      rootDir,
+      "linux/x86",
+      RepositoryInfo("", "", "", "", "", "", "", false, true),
+      CommitInfo(sha1, "", "", "", "", AuthorInfo("", "", "")),
+      BuildInfo(randomBuildNumber, "", "", "", "", "", "", None, None, None),
+      "",
+      None,
+      None
+    )
+  )
+}
