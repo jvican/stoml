@@ -32,16 +32,7 @@ pomExtra in Global := {
 bintrayOrganization := None
 releaseCrossBuild := false
 
-lazy val releaseOnMergeOnlyCi = taskKey[Unit]("Release on merge only in CI.")
-releaseOnMergeOnlyCi := {
-  platformInsideCi.flatMap { value =>
-    if (value) platformReleaseModule
-    else Def.task {}
-  }.value
-}
-
-/* Tricking the sbt-platform plugin to test `platformReleaseStable`
- * This test is very brittle and will need to change soon.  */
+/* Tricking the sbt-platform plugin to test `platformReleaseStable` */
 platformCiEnvironment := {
   val rootDir =
     if (platformInsideCi.value) file("/drone")
