@@ -34,11 +34,10 @@ releaseCrossBuild := false
 
 lazy val releaseOnMergeOnlyCi = taskKey[Unit]("Release on merge only in CI.")
 releaseOnMergeOnlyCi := {
-  if (platformInsideCi.value) {
-    platformReleaseModule.map { sth =>
-      ()
-    }.value
-  }
+  platformInsideCi.flatMap { value =>
+    if (value) platformReleaseModule
+    else Def.task {}
+  }.value
 }
 
 /* Tricking the sbt-platform plugin to test `platformReleaseStable`
