@@ -41,3 +41,6 @@ bintrayPackage := "stoml"
 
 // Release
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+// Release early
+releaseEarlyEnableLocalReleases := true
