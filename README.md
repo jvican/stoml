@@ -11,7 +11,7 @@ Forget YAML, go TOML.
 ## Import in your project
 ```scala
 "me.vican.jorge" %% "stoml" % "0.3"
-resolvers += Some(Resolver.bintrayRepo("jvican", "releases"))
+resolvers += Resolver.bintrayRepo("jvican", "releases")
 ```
   
 ## Acknowledgements
