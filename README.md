@@ -1,13 +1,12 @@
 # TOML parser for Scala [![Build Status](https://travis-ci.org/jvican/stoml.svg)](https://travis-ci.org/jvican/stoml)
-We, computer scientists, need to get in touch with the world (oh, damn it). Yeah, that
-means that the people we build software for need to interact with it in an easy way.
-It's part of the job, we cannot ignore it. That's why I have built this library.
   
-[TOML](https://github.com/toml-lang/toml#user-content-comment) aims to be a 
-minimal configuration file format (minimal, yay!). Just what everyone is looking for. 
-So this is a Scala library that allows you to parse any TOML file in a blink 
-of an eye. It is very handy when the user is not a technical user. Also, it is easier
-than YAML.
+[TOML](https://github.com/toml-lang/toml#user-content-comment) is a 
+minimal configuration file format that shines because of its simplicity.
+
+This is a clean-room parser implementation of the TOML spec that allows you to
+quickly parse any TOML file and get great error reporting when it fails.
+
+Forget YAML, go TOML.
 
 ## Import in your project
 ```scala
@@ -16,4 +15,4 @@ resolvers += Some(Resolver.bintrayRepo("jvican", "releases"))
 ```
   
 ## Acknowledgements
-Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) (which means astonishing speed for parsing) and [Scalacheck](https://github.com/rickynils/scalacheck) to automatically parse any combination of valid TOML files.
+Built on top of [Fastparse](https://github.com/lihaoyi/fastparse) (which means fast parsing) and [Scalacheck](https://github.com/rickynils/scalacheck) to automatically check any combination of valid TOML elements.
