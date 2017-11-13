@@ -63,6 +63,15 @@ object Toml extends TomlSymbol with Common {
     def apply(ls: Key, ps: Seq[Pair]): Table =
       Table(ls -> (ps map (Pair.unapply(_).get) toMap))
   }
+
+  case class TableArray(elem: (Key, Map[String, Elem])) extends Node
+
+  object TableArray {
+    def apply(ls: Key, ps: Seq[Pair]): TableArray =
+      TableArray(ls -> (ps map (Pair.unapply(_).get) toMap))
+  }
+
+  case class TableArrayItems(elem: List[TableArray]) extends Node
 }
 
 trait ParserUtil { this: TomlSymbol =>
@@ -173,21 +182,29 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     P(validKey.rep(min = 1, sep = WS0.? ~ "." ~ WS0.?))
   val tableDef: Parser[Seq[String]] =
     P("[" ~ WS0.? ~ tableIds ~ WS0.? ~ "]")
+  val tableArrayDef: Parser[Seq[String]] =
+    P("[[" ~ WS.? ~ tableIds ~ WS.? ~ "]]")
+
   val table: Parser[Table] =
-    P(WS ~ tableDef ~ WS ~ pair.rep(sep = WS)).map(t =>
-      Table(t._1.map(Str.cleanStr).mkString("."), t._2))
+    P(WS ~ tableDef ~ WS ~ pair.rep(sep = WS)).map { case (a, b) =>
+      Table(a.map(Str.cleanStr).mkString("."), b)
+    }
+  val tableArray: Parser[TableArray] =
+    P(WS ~ tableArrayDef ~ WS ~ pair.rep(sep = WS)).map { case (a, b) =>
+      TableArray(a.map(Str.cleanStr).mkString("."), b)
+    }
 
   lazy val elem: Parser[Elem] = P {
     WS ~ (string | boolean | double | integer | array | date) ~ WS
   }
 
-  lazy val node: Parser[Node] = P(WS ~ (pair | table) ~ WS)
+  lazy val node: Parser[Node] = P(WS ~ (pair | table | tableArray) ~ WS)
   lazy val nodes: Parser[Seq[Node]] = P(node.rep(min = 1, sep = WS) ~ End)
 }
 
 trait TomlParserApi extends TomlParser with Common {
 
-  import stoml.Toml.{Node, Table, Pair}
+  import stoml.Toml.{Node, Table, Pair, TableArray, TableArrayItems}
 
   case class TomlContent(map: Map[Key, Node]) {
     def lookup(k: Key): Option[Node] = map.get(k)
@@ -199,11 +216,20 @@ trait TomlParserApi extends TomlParser with Common {
 
   object TomlContent {
     def apply(s: Seq[Node]): TomlContent = TomlContent {
-      s.foldLeft(Map.empty[Key, Node])((m, e) =>
-        e match {
-          case t: Table => m + (t.elem._1 -> t)
-          case p: Pair => m + (p.elem._1 -> p)
-      })
+      s.foldLeft(Map.empty[Key, Node]) { (m, e) =>
+        val value = e match {
+          case t: Table => t.elem._1 -> t
+          case t: TableArray =>
+             t.elem._1 -> (m.get(t.elem._1) match {
+              case Some(TableArrayItems(items)) =>
+                TableArrayItems(items :+ t)
+              case _ => TableArrayItems(List(t))
+            })
+          case p: Pair => p.elem._1 -> p
+        }
+
+        m + value
+      }
     }
   }
 

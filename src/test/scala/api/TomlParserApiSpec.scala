@@ -4,6 +4,7 @@ import fastparse.core.Parsed.{Failure, Success}
 import org.scalatest.{FunSpec, Matchers}
 
 class TomlParserApiSpec extends FunSpec with Matchers {
+  import stoml.Toml._
   import stoml.TomlParserApi._
 
   val smallFileTest =
@@ -41,6 +42,41 @@ class TomlParserApiSpec extends FunSpec with Matchers {
           assert(subkeys(0).elem.isInstanceOf[(Any, Any)])
         case f: Failure[_, _] =>
           fail("`toToml` has not parsed correctly the file")
+      }
+    }
+
+    it("should parse parse table arrays") {
+      val array =
+        """
+          |[[products]]
+          |name = "Hammer"
+          |sku = 738594937
+          |colour = "blue"
+          |
+          |[[products]]
+          |name = "Nail"
+          |sku = 284758393
+          |colour = "grey"
+        """.stripMargin
+
+      parseToml(array) match {
+        case Success(v, _) =>
+          val p = v.lookup("products")
+          println(p)
+          assert(p.contains(TableArrayItems(List(
+            TableArray("products", List(
+              Pair("name" -> Str("Hammer")),
+              Pair("sku" -> Integer(738594937)),
+              Pair("colour" -> Str("blue"))
+            )),
+            TableArray("products", List(
+              Pair("name" -> Str("Nail")),
+              Pair("sku" -> Integer(284758393)),
+              Pair("colour" -> Str("grey"))
+            ))
+          ))))
+
+        case f: Failure[_, _] => fail()
       }
     }
   }

@@ -11,16 +11,14 @@ trait ArrayTomlGen {
     with StringTomlGen
     with NumbersTomlGen =>
 
-  val openChars = List("[", "[\n")
-  val seps = List(",\n", ",")
-  val closeChars = List("]", "\n]")
-
   def arrayFormat(s: Seq[_], fs: (String, String, String)): String =
     fs._1 + (s mkString fs._2) + fs._3
 
   import Gen.{nonEmptyListOf, oneOf}
 
-  def arrayGen = for {
+  def arrayGen(openChars: List[String],
+               seps: List[String],
+               closeChars: List[String]) = for {
     ts <- oneOf(validStrGen, validDoubleGen, validLongGen)
     elems <- nonEmptyListOf(ts)
     c1 <- oneOf(openChars)
@@ -36,7 +34,22 @@ class ArrayTomlSpec extends PropSpec
     with TestParserUtil {
 
   property("parse arrays") {
-    forAll(arrayGen) {
+    val openChars = List("[", "[\n")
+    val seps = List(",\n", ",")
+    val closeChars = List("]", "\n]")
+
+    forAll(arrayGen(openChars, seps, closeChars)) {
+      s: String =>
+        shouldBeSuccess(elem.parse(s))
+    }
+  }
+
+  property("parse table arrays") {
+    val openChars = List("[[", "[[\n")
+    val seps = List(",\n", ",")
+    val closeChars = List("]]", "\n]]")
+
+    forAll(arrayGen(openChars, seps, closeChars)) {
       s: String =>
         shouldBeSuccess(elem.parse(s))
     }
