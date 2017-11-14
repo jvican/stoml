@@ -12,7 +12,8 @@ trait TableTomlGen {
     with StringTomlGen
     with NumbersTomlGen
     with BooleanTomlGen
-    with CommentTomlGen =>
+    with CommentTomlGen
+    with InlineTableTomlGen =>
 
   val sps = List(" ", "\t")
 
@@ -38,15 +39,9 @@ trait TableTomlGen {
     validStrGen,
     validDoubleGen,
     validLongGen,
-    validBoolGen
+    validBoolGen,
+    validInlineTableGen
   )
-
-  def bareKeyGen = Gen.someOf(
-    Gen.alphaLowerChar,
-    Gen.alphaUpperChar,
-    Gen.alphaNumChar,
-    Gen.oneOf('_', '-')
-  ) suchThat (_.nonEmpty) map (_.mkString)
 
   def pairGen: Gen[String] = for {
     key <- oneOf(doubleQuoteStrGen, bareKeyGen)
@@ -75,13 +70,13 @@ trait TableTomlGen {
     c1 <- commentGen
     c2 <- commentGen
   } yield c1 + tableFormat(tdef, ps) + c2
-
 }
 
 class TableTomlSpec extends PropSpec 
     with PropertyChecks with Matchers
     with BooleanTomlGen with StringTomlGen
     with NumbersTomlGen with TableTomlGen
+    with InlineTableTomlGen
     with CommentTomlGen with TomlParser
     with TestParserUtil {
 
