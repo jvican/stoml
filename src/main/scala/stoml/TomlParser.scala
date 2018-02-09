@@ -173,10 +173,12 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val dashes = P(CharIn(Dashes))
   val bareKey = P((letters | digits | dashes).rep(min = 1)).!
   val validKey: Parser[String] = P(bareKey | NoCut(basicStr)).!
-  lazy val pair: Parser[Pair] =
+  val pair: Parser[Pair] =
     P(validKey ~ WS0.? ~ "=" ~ WS0.? ~ elem) map Pair
-  lazy val array: Parser[Arr] =
+  val array: Parser[Arr] =
     P("[" ~ WS ~ elem.rep(sep = "," ~ WS) ~ ",".? ~ WS ~ "]") map Arr
+  val inlineTable: Parser[Table] =
+    P("{" ~ WS ~ pair.rep(sep = "," ~ WS) ~ "}").map(p => Table("", p))
 
   val tableIds: Parser[Seq[String]] =
     P(validKey.rep(min = 1, sep = WS0.? ~ "." ~ WS0.?))
@@ -195,7 +197,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     }
 
   lazy val elem: Parser[Elem] = P {
-    WS ~ (string | boolean | double | integer | array | date) ~ WS
+    WS ~ (string | boolean | double | integer | array | inlineTable | date) ~ WS
   }
 
   lazy val node: Parser[Node] = P(WS ~ (pair | table | tableArray) ~ WS)
@@ -206,17 +208,17 @@ trait TomlParserApi extends TomlParser with Common {
 
   import stoml.Toml.{Node, Table, Pair, TableArray, TableArrayItems}
 
-  case class TomlContent(map: Map[Key, Node]) {
-    def lookup(k: Key): Option[Node] = map.get(k)
-    def filter(f: Key => Boolean): Iterator[Node] =
+  case class TomlContent(map: Map[Key, Toml.Elem]) {
+    def lookup(k: Key): Option[Toml.Elem] = map.get(k)
+    def filter(f: Key => Boolean): Iterator[Toml.Elem] =
       map.filterKeys(f).values.iterator
-    def childOf(parentKey: Key): Iterator[Node] =
+    def childOf(parentKey: Key): Iterator[Toml.Elem] =
       filter(key => key.startsWith(parentKey))
   }
 
   object TomlContent {
     def apply(s: Seq[Node]): TomlContent = TomlContent {
-      s.foldLeft(Map.empty[Key, Node]) { (m, e) =>
+      s.foldLeft(Map.empty[Key, Toml.Elem]) { (m, e) =>
         val value = e match {
           case t: Table => t.elem._1 -> t
           case t: TableArray =>
@@ -225,7 +227,7 @@ trait TomlParserApi extends TomlParser with Common {
                 TableArrayItems(items :+ t)
               case _ => TableArrayItems(List(t))
             })
-          case p: Pair => p.elem._1 -> p
+          case p: Pair => p.elem._1 -> p.elem._2
         }
 
         m + value

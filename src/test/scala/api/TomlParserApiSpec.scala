@@ -45,7 +45,7 @@ class TomlParserApiSpec extends FunSpec with Matchers {
       }
     }
 
-    it("should parse parse table arrays") {
+    it("should parse table arrays") {
       val array =
         """
           |[[products]]
@@ -62,7 +62,6 @@ class TomlParserApiSpec extends FunSpec with Matchers {
       parseToml(array) match {
         case Success(v, _) =>
           val p = v.lookup("products")
-          println(p)
           assert(p.contains(TableArrayItems(List(
             TableArray("products", List(
               Pair("name" -> Str("Hammer")),
@@ -75,6 +74,28 @@ class TomlParserApiSpec extends FunSpec with Matchers {
               Pair("colour" -> Str("grey"))
             ))
           ))))
+
+        case f: Failure[_, _] => fail()
+      }
+    }
+
+    it("should parse inline table arrays") {
+      val array =
+        """
+          |product = {
+          |  name   = "Hammer",
+          |  colour = "blue"
+          |}
+        """.stripMargin
+
+      parseToml(array) match {
+        case Success(v, _) =>
+          val p = v.lookup("product")
+          assert(p.contains(
+            Table("", List(
+              Pair("name" -> Str("Hammer")),
+              Pair("colour" -> Str("blue"))))
+          ))
 
         case f: Failure[_, _] => fail()
       }
