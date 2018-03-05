@@ -1,11 +1,18 @@
 package stoml
 
+import java.time.{
+  LocalDateTime  => JLocalDateTime,
+  LocalTime      => JLocalTime,
+  LocalDate      => JLocalDate,
+  OffsetDateTime => JOffsetDateTime,
+  ZoneOffset
+}
+
 import java.io.File
+
 import fastparse.all._
 
 import scala.language.{implicitConversions, postfixOps}
-import java.util.{Date => JDate}
-import java.text.SimpleDateFormat
 
 private[stoml] trait Common {
   type Key = String
@@ -53,7 +60,10 @@ object Toml extends TomlSymbol with Common {
 
   case class Arr(elem: Seq[Elem]) extends AnyVal with Elem
 
-  case class Date(elem: JDate) extends AnyVal with Elem
+  case class Date          (elem: JLocalDate     ) extends AnyVal with Elem
+  case class Time          (elem: JLocalTime     ) extends AnyVal with Elem
+  case class DateTime      (elem: JLocalDateTime ) extends AnyVal with Elem
+  case class OffsetDateTime(elem: JOffsetDateTime) extends AnyVal with Elem
 
   case class Pair(elem: (String, Elem)) extends AnyVal with Node
 
@@ -79,7 +89,6 @@ trait ParserUtil { this: TomlSymbol =>
   import Toml.NamedFunction
 
   val Whitespace = NamedFunction(WSChars.contains(_: Char), "Whitespace")
-  val Digits = NamedFunction('0' to '9' contains (_: Char), "Digits")
   val Letters =
     NamedFunction((('a' to 'z') ++ ('A' to 'Z')).contains(_: Char), "Letters")
   val UntilNewline =
@@ -109,7 +118,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
 
   val letters = P(CharsWhile(Letters))
   val digit = P(CharIn('0' to '9'))
-  val digits = P(CharsWhile(Digits))
+  val digits = P(digit.rep(1))
 
   val skipEscapedDoubleQuote = P("\\" ~ "\"")
   val literalChars = NamedFunction(!SingleQuote.contains(_: Char), "LitStr")
@@ -148,27 +157,40 @@ trait TomlParser extends ParserUtil with TomlSymbol {
   val `false` = P("false").map(_ => False)
   val boolean: Parser[Bool] = P(`true` | `false`)
 
-  lazy val date: Parser[Date] =
-    rfc3339.opaque("<valid-date-rfc3339>").map { t =>
-      /* Even though this extra parsing is not necessary,
-       * it is done just for simplicity, avoiding the use
-       * of `java.util.Calendar` instances. */
-      Date(formatter.parse(t))
-    }
+  private val TenPowers =
+    List(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000)
 
-  private val formatter =
-    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  val localTime: Parser[Time] = P(
+    digit.rep(2).! ~ ":" ~ digit.rep(2).! ~ ":" ~ digit.rep(2).! ~ ("." ~ digit.rep.!).?
+  ).map { case (h, m, s, ns) =>
+    val nano = ns.map { str =>
+      val digits = str.length
+      str.toInt * TenPowers(9 - digits)
+    }.getOrElse(0)
 
-  def twice[T](p: Parser[T]) = p ~ p
+    Time(JLocalTime.of(h.toInt, m.toInt, s.toInt, nano))
+  }
 
-  def fourTimes[T](p: Parser[T]) = twice(p) ~ twice(p)
+  val localDate: Parser[Date] = P(
+    digit.rep(4).! ~ "-" ~ digit.rep(2).! ~ "-" ~ digit.rep(2).!
+  ).map { case (y, m, d) =>
+    Date(JLocalDate.of(y.toInt, m.toInt, d.toInt))
+  }
 
-  val rfc3339: Parser[String] = P {
-    fourTimes(digit) ~ "-" ~ twice(digit) ~ "-" ~
-      twice(digit) ~ "T" ~ twice(digit) ~ ":" ~
-      twice(digit) ~ ":" ~ twice(digit) ~ ("." ~
-      digit.rep(min = 3, max = 3)).? ~ "Z".?
-  }.!
+  val localDateTime: Parser[DateTime] = P(
+    localDate ~ "T" ~ localTime
+  ).map { case (date, time) =>
+    DateTime(JLocalDateTime.of(date.elem, time.elem))
+  }
+
+  val offsetDateTime: Parser[OffsetDateTime] = P(
+    localDateTime ~ ("Z" | (("-" | "+") ~ digit.rep(2) ~ ":" ~ digit.rep(2))).!
+  ).map { case (dateTime, offset) =>
+    OffsetDateTime(
+      JOffsetDateTime.of(dateTime.elem, ZoneOffset.of(offset)))
+  }
+
+  val date = P(offsetDateTime | localDateTime | localDate | localTime)
 
   val dashes = P(CharIn(Dashes))
   val bareKey = P((letters | digits | dashes).rep(min = 1)).!
@@ -197,7 +219,7 @@ trait TomlParser extends ParserUtil with TomlSymbol {
     }
 
   lazy val elem: Parser[Elem] = P {
-    WS ~ (string | boolean | double | integer | array | inlineTable | date) ~ WS
+    WS ~ (date | string | boolean | double | integer | array | inlineTable) ~ WS
   }
 
   lazy val node: Parser[Node] = P(WS ~ (pair | table | tableArray) ~ WS)
