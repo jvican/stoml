@@ -4,9 +4,9 @@ name := "stoml"
 
 organization := "me.vican.jorge"
 
-scalaVersion := "2.12.0"
+scalaVersion := "2.12.4"
 
-crossScalaVersions := Seq("2.10.6", "2.11.7", "2.12.0")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4")
 
 libraryDependencies ++= Vector(
   "com.lihaoyi" %% "fastparse" % "0.4.2",
