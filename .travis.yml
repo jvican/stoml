@@ -13,6 +13,4 @@ notifications:
       - jorgevc@fastmail.es
 
 jdk:
-  - oraclejdk7
   - oraclejdk8
-  - openjdk7
