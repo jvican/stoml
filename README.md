@@ -10,7 +10,7 @@ Forget YAML, go TOML.
 
 ## Import in your project
 ```scala
-"me.vican.jorge" %% "stoml" % "0.3"
+"me.vican.jorge" %% "stoml" % "0.5"
 resolvers += Resolver.bintrayRepo("jvican", "releases")
 ```
   
